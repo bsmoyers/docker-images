@@ -91,8 +91,11 @@ else
   exit 1
 fi
 
+# Publish a different Version number than what is specified by Dockerfile
+PUBLISH_VERSION=${PUBLISH_VERSION:-$VERSION}
+
 # WebLogic Image Name
-IMAGE_NAME="oracle/weblogic:$VERSION-$DISTRIBUTION"
+IMAGE_NAME="oracle/weblogic:${PUBLISH_VERSION}-$DISTRIBUTION"
 
 # Go into version folder
 cd $VERSION
@@ -127,6 +130,18 @@ if [ "$PROXY_SETTINGS" != "" ]; then
   echo "Proxy settings were found and will be used during build."
 fi
 
+# Packge file name overrides
+EXTRA_BUILD_ARGS=""
+if [ "${PKG_NAME}" != "" ]; then
+  EXTRA_BUILD_ARGS="$EXTRA_BUILD_ARGS --build-arg PKG_NAME=${PKG_NAME}"
+fi
+if [ "${JAR_NAME}" != "" ]; then
+  EXTRA_BUILD_ARGS="$EXTRA_BUILD_ARGS --build-arg JAR_NAME=${JAR_NAME}"
+fi
+if [ "$EXTRA_BUILD_ARGS" != "" ]; then
+  echo "Package and Jar file name settings were found and will be used during build."
+fi
+
 # ################## #
 # BUILDING THE IMAGE #
 # ################## #
@@ -134,7 +149,7 @@ echo "Building image '$IMAGE_NAME' ..."
 
 # BUILD THE IMAGE (replace all environment variables)
 BUILD_START=$(date '+%s')
-docker build --force-rm=$NOCACHE --no-cache=$NOCACHE $PROXY_SETTINGS -t $IMAGE_NAME -f Dockerfile.$DISTRIBUTION . || {
+docker build --force-rm=$NOCACHE --no-cache=$NOCACHE $PROXY_SETTINGS $EXTRA_BUILD_ARGS -t $IMAGE_NAME -f Dockerfile.$DISTRIBUTION . || {
   echo "There was an error building the image."
   exit 1
 }
@@ -145,7 +160,7 @@ echo ""
 
 if [ $? -eq 0 ]; then
 cat << EOF
-  WebLogic Docker Image for '$DISTRIBUTION' version $VERSION is ready to be extended:
+  WebLogic Docker Image for '$DISTRIBUTION' version ${PUBLISH_VERSION} is ready to be extended:
 
     --> $IMAGE_NAME
 

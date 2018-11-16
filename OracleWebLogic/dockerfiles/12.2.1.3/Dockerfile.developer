@@ -61,12 +61,13 @@ ENV DOMAIN_NAME="${DOMAIN_NAME:-base_domain}" \
     ADMINISTRATION_PORT_ENABLED="${ADMINISTRATION_PORT_ENABLED:-true}" \
     ADMINISTRATION_PORT="${ADMINISTRATION_PORT:-9002}" 
 
-
-
-# Environment variables required for this build (do NOT change)
+# Environment variables required for this build 
 # -------------------------------------------------------------
-ENV FMW_PKG=fmw_12.2.1.3.0_wls_quick_Disk1_1of1.zip \
-    FMW_JAR=fmw_12.2.1.3.0_wls_quick.jar
+ARG PKG_NAME=fmw_12.2.1.3.0_wls_quick_Disk1_1of1.zip
+ARG JAR_NAME=fmw_12.2.1.3.0_wls_quick.jar
+
+ENV FMW_PKG=$PKG_NAME \
+    FMW_JAR=$JAR_NAME
 
 # Copy packages
 # -------------
